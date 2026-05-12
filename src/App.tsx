@@ -267,9 +267,13 @@ export default function App() {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="w-24 h-24 bg-indigo-600 rounded-[2.5rem] flex items-center justify-center shadow-2xl shadow-indigo-200 mb-10 animate-float relative z-10"
+          className="w-24 h-24 bg-white rounded-[2.5rem] flex items-center justify-center shadow-2xl shadow-indigo-100 mb-10 animate-float relative z-10 overflow-hidden border border-slate-100 p-2"
         >
-          <RotateCw className="w-12 h-12 text-white" />
+          <img 
+            src="https://res.cloudinary.com/dvzlqsgwq/image/upload/v1778598557/Logo_04_kxnh6l.png" 
+            alt="Logo" 
+            className="w-full h-full object-contain"
+          />
         </motion.div>
 
         <div className="relative z-10">
@@ -306,7 +310,7 @@ export default function App() {
       <nav className="h-20 bg-white/70 backdrop-blur-xl border-b border-white/50 px-4 md:px-12 flex items-center justify-between shadow-sm z-[100] sticky top-0">
         <div className="flex items-center gap-3 md:gap-4">
           <div className="w-10 h-10 md:w-11 md:h-11 bg-white rounded-2xl flex items-center justify-center shadow-lg border border-slate-100 shrink-0 transform rotate-3 overflow-hidden">
-            <img src="/logo.png" alt="Logo" className="w-full h-full object-contain p-1" />
+            <img src="https://res.cloudinary.com/dvzlqsgwq/image/upload/v1778598557/Logo_04_kxnh6l.png" alt="Logo" className="w-full h-full object-contain p-1" />
           </div>
           <div className="flex flex-col">
             <span className="text-lg md:text-xl font-black tracking-tight text-slate-900 leading-none">

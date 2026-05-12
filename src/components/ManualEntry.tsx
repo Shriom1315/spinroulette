@@ -20,25 +20,26 @@ export default function ManualEntry({ onAddName }: ManualEntryProps) {
   return (
     <form 
       onSubmit={handleSubmit}
-      className="w-full flex items-center p-1.5 bg-white border border-slate-200 rounded-2xl shadow-sm hover:layer-shadow focus-within:border-indigo-400 focus-within:ring-4 focus-within:ring-indigo-50 transition-all group"
+      className="w-full flex items-center p-1 bg-white/40 backdrop-blur-md border-2 border-white rounded-3xl premium-shadow hover:border-indigo-100 focus-within:border-indigo-400 focus-within:ring-8 focus-within:ring-indigo-50/50 transition-all group"
     >
-      <div className="pl-3 text-slate-300 group-focus-within:text-indigo-400 transition-colors">
-        <UserPlus size={18} />
+      <div className="pl-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors">
+        <UserPlus size={20} />
       </div>
       <input
         type="text"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="Add member name..."
-        className="flex-1 bg-transparent px-3 py-2 outline-none text-sm font-medium text-slate-800 placeholder:text-slate-400"
+        placeholder="Type name here..."
+        className="flex-1 bg-transparent px-4 py-3.5 outline-none text-base font-bold text-slate-800 placeholder:text-slate-400 placeholder:font-medium"
       />
       <button
         type="submit"
         disabled={!name.trim()}
-        className="p-3 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-100 disabled:text-slate-400 text-white rounded-xl transition-all flex items-center justify-center shadow-lg shadow-indigo-100 shrink-0"
+        className="p-3.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-200 disabled:text-slate-400 text-white rounded-[1.25rem] transition-all flex items-center justify-center shadow-xl shadow-indigo-100 group-active:scale-95 shrink-0"
       >
-        <Plus className="w-5 h-5" />
+        <Plus className="w-5 h-5 stroke-[3]" />
       </button>
     </form>
   );
 }
+

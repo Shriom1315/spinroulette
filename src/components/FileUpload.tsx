@@ -1,4 +1,4 @@
-import { Upload } from "lucide-react";
+import { Upload, FileSpreadsheet } from "lucide-react";
 import Papa from "papaparse";
 import { useRef } from "react";
 
@@ -45,19 +45,23 @@ export default function FileUpload({ onNamesLoaded }: FileUploadProps) {
       />
       <button
         onClick={() => fileInputRef.current?.click()}
-        className="w-full p-6 bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md hover:border-indigo-200 transition-all group flex items-center gap-4 text-left"
+        className="w-full p-6 glass-card border-2 border-white hover:border-indigo-200 transition-all group flex items-center gap-5 text-left active:scale-[0.98]"
       >
-        <div className="w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-600 transition-all duration-300">
-          <Upload className="text-indigo-600 group-hover:text-white transition-colors w-5 h-5" />
+        <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center group-hover:bg-indigo-600 group-hover:rotate-6 transition-all duration-500">
+          <Upload className="text-indigo-600 group-hover:text-white transition-colors w-6 h-6" />
         </div>
         <div className="flex-1">
-          <p className="text-slate-800 font-bold text-sm">Upload Member List</p>
-          <p className="text-slate-400 text-xs mt-0.5">Select CSV or TXT file</p>
+          <p className="text-slate-900 font-extrabold text-base tracking-tight">Upload List</p>
+          <p className="text-slate-500 text-xs font-medium flex items-center gap-1.5 mt-0.5">
+            <FileSpreadsheet size={12} className="text-slate-400" />
+            CSV or Text files
+          </p>
         </div>
-        <div className="px-3 py-1 bg-slate-100 rounded-lg text-[10px] font-black text-slate-500 uppercase tracking-widest group-hover:bg-indigo-100 group-hover:text-indigo-600 transition-colors">
+        <div className="px-4 py-2 bg-indigo-50 text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] rounded-xl group-hover:bg-indigo-600 group-hover:text-white transition-all duration-300">
             IMPORT
         </div>
       </button>
     </div>
   );
 }
+

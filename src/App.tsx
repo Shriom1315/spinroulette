@@ -390,19 +390,21 @@ export default function App() {
               )}
 
               {session?.currentWinner && (
-                 <div className="fixed inset-0 z-[90] bg-slate-900/20 backdrop-blur-md flex items-center justify-center p-6 sm:p-8">
-                    <Stopwatch 
-                      isAdmin={isAdmin}
-                      isActive={session.stopwatchActive}
-                      secondsRemaining={secondsRemaining}
-                      onToggle={toggleStopwatch}
-                      onReset={resetStopwatch}
-                      onClose={closeStopwatch} 
-                      onVote={castVote}
-                      userVote={myVote}
-                      results={voteResults}
-                      winnerName={session.currentWinner}
-                    />
+                 <div className="fixed inset-0 z-[90] bg-slate-900/20 backdrop-blur-md overflow-y-auto no-scrollbar pt-24 pb-12 px-4 md:px-8">
+                    <div className="min-h-full flex items-center justify-center">
+                        <Stopwatch 
+                          isAdmin={isAdmin}
+                          isActive={session.stopwatchActive}
+                          secondsRemaining={secondsRemaining}
+                          onToggle={toggleStopwatch}
+                          onReset={resetStopwatch}
+                          onClose={closeStopwatch} 
+                          onVote={castVote}
+                          userVote={myVote}
+                          results={voteResults}
+                          winnerName={session.currentWinner}
+                        />
+                    </div>
                  </div>
               )}
             </AnimatePresence>

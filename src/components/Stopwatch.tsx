@@ -88,37 +88,7 @@ export default function Stopwatch({
           </div>
         </div>
 
-        {/* Real-time Results (Admin Only) */}
-        {results && isAdmin && (
-          <div className="flex flex-col gap-4 flex-1 w-full md:w-auto">
-             <div className="space-y-2">
-                <div className="flex justify-between items-end">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Buy It</span>
-                    <span className="text-sm font-black text-emerald-600">{results.buy}</span>
-                </div>
-                <div className="h-2.5 bg-slate-100/50 rounded-full overflow-hidden border border-white">
-                    <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${(results.buy / (Math.max(1, results.buy + results.leave))) * 100}%` }}
-                        className="h-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]" 
-                    />
-                </div>
-             </div>
-             <div className="space-y-2">
-                <div className="flex justify-between items-end">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Leave It</span>
-                    <span className="text-sm font-black text-rose-600">{results.leave}</span>
-                </div>
-                <div className="h-2.5 bg-slate-100/50 rounded-full overflow-hidden border border-white">
-                    <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: `${(results.leave / (Math.max(1, results.buy + results.leave))) * 100}%` }}
-                        className="h-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.3)]" 
-                    />
-                </div>
-             </div>
-          </div>
-        )}
+        {/* Real-time Results removed to prevent spoiler during screen share */}
       </div>
 
       {/* Interaction Zone */}

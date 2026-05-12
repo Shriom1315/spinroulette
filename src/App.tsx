@@ -21,6 +21,7 @@ interface SessionData {
   stopwatchEndTime: number;
   stopwatchRemaining: number;
   adminId: string;
+  syncTimestamp?: number; // Added for clock synchronization
 }
 
 interface VoteData {
@@ -36,6 +37,7 @@ export default function App() {
   const [isSpinning, setIsSpinning] = useState(false);
   const [localWinner, setLocalWinner] = useState<string | null>(null);
   const [votes, setVotes] = useState<VoteData[]>([]);
+  const [clockOffset, setClockOffset] = useState(0); // State for clock synchronization
   const wheelRef = useRef<WheelRef>(null);
 
   // Auth State
@@ -52,7 +54,13 @@ export default function App() {
     const sessionRef = doc(db, 'sessions', SESSION_ID);
     const unsubSession = onSnapshot(sessionRef, (docSnap) => {
       if (docSnap.exists()) {
-        setSession(docSnap.data() as SessionData);
+        const data = docSnap.data() as SessionData;
+        setSession(data);
+        
+        // Calculate clock offset if syncTimestamp exists
+        if (data.syncTimestamp) {
+          setClockOffset(data.syncTimestamp - Date.now());
+        }
       } else if (currentUser) {
         // Create initial session if user is signed in and it doesn't exist
         const initial: SessionData = {
@@ -61,7 +69,9 @@ export default function App() {
           currentWinner: null,
           stopwatchActive: false,
           stopwatchEndTime: 0,
-          adminId: currentUser.uid
+          stopwatchRemaining: 60,
+          adminId: currentUser.uid,
+          syncTimestamp: Date.now()
         };
         setDoc(sessionRef, initial);
       }
@@ -135,7 +145,9 @@ export default function App() {
             names: [],
             pitchedMembers: [],
             currentWinner: null,
-            stopwatchActive: false
+            stopwatchActive: false,
+            stopwatchRemaining: 60,
+            syncTimestamp: Date.now()
         });
     }
   };
@@ -158,23 +170,27 @@ export default function App() {
       await updateDoc(doc(db, 'sessions', SESSION_ID), {
         stopwatchActive: true,
         stopwatchEndTime: now + (remaining * 1000),
+        syncTimestamp: now // Anchor point for participants
       });
     } else {
       // Pausing
       const remaining = Math.max(0, Math.floor((session.stopwatchEndTime - now) / 1000));
       await updateDoc(doc(db, 'sessions', SESSION_ID), {
         stopwatchActive: false,
-        stopwatchRemaining: remaining
+        stopwatchRemaining: remaining,
+        syncTimestamp: now
       });
     }
   };
 
   const resetStopwatch = async () => {
     if (!isAdmin) return;
+    const now = Date.now();
     await updateDoc(doc(db, 'sessions', SESSION_ID), {
       stopwatchActive: true,
-      stopwatchEndTime: Date.now() + 60000,
-      stopwatchRemaining: 60
+      stopwatchEndTime: now + 60000,
+      stopwatchRemaining: 60,
+      syncTimestamp: now
     });
   };
 
@@ -183,7 +199,8 @@ export default function App() {
     await updateDoc(doc(db, 'sessions', SESSION_ID), {
       stopwatchActive: false,
       stopwatchRemaining: 60,
-      currentWinner: null
+      currentWinner: null,
+      syncTimestamp: Date.now()
     });
   };
 
@@ -205,12 +222,20 @@ export default function App() {
 
     if (session.stopwatchActive && session.stopwatchEndTime > 0) {
       const updateTimer = () => {
-        const remaining = Math.max(0, Math.floor((session.stopwatchEndTime - Date.now()) / 1000));
+        // Source of truth: Admin's clock corrected by our local offset
+        const correctedNow = Date.now() + clockOffset;
+        const remaining = Math.max(0, Math.floor((session.stopwatchEndTime - correctedNow) / 1000));
+        
         setSecondsRemaining(remaining);
+        
         if (remaining === 0) {
            // Auto-pause when reaching 0 if admin
            if (isAdmin && session.stopwatchActive) {
-              updateDoc(doc(db, 'sessions', SESSION_ID), { stopwatchActive: false, stopwatchRemaining: 0 });
+              updateDoc(doc(db, 'sessions', SESSION_ID), { 
+                stopwatchActive: false, 
+                stopwatchRemaining: 0,
+                syncTimestamp: Date.now()
+              });
            }
         }
       };
@@ -221,7 +246,8 @@ export default function App() {
     } else {
       setSecondsRemaining(session.stopwatchRemaining !== undefined ? session.stopwatchRemaining : 60);
     }
-  }, [session?.stopwatchActive, session?.stopwatchEndTime, session?.stopwatchRemaining, isAdmin]);
+  }, [session?.stopwatchActive, session?.stopwatchEndTime, session?.stopwatchRemaining, clockOffset, isAdmin]);
+
 
   // Vote Aggregation
   const currentVotes = votes.filter(v => v.winnerName === session?.currentWinner);

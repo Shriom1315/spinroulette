@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "motion/react";
-import { Play, RotateCcw, Timer as TimerIcon, ThumbsUp, ThumbsDown, CheckCircle2, X } from "lucide-react";
+import { Play, RotateCcw, ThumbsUp, ThumbsDown, CheckCircle2, X } from "lucide-react";
 
 interface VoteResult {
   buy: number;
@@ -33,63 +33,64 @@ export default function Stopwatch({
   winnerName
 }: StopwatchProps) {
   const progress = (secondsRemaining / 60) * 100;
+  const strokeDasharray = 2 * Math.PI * 44; // Radius is 44
 
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.9, y: 40 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.9, y: 40 }}
-      className="glass-card p-6 md:p-10 flex flex-col items-center gap-8 w-full max-w-lg mx-auto relative overflow-hidden"
+      className="glass-card p-6 md:p-10 flex flex-col items-center gap-6 md:gap-8 w-full max-w-lg mx-auto relative overflow-hidden"
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-indigo-50/20 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-indigo-500/5 to-transparent pointer-events-none" />
 
       {isAdmin && (
         <button 
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all z-10"
+          className="absolute top-5 right-5 p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all z-20"
         >
           <X size={20} />
         </button>
       )}
 
       {/* Winner Identity */}
-      <div className="flex flex-col items-center text-center relative z-10">
-        <div className="w-16 h-16 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-emerald-100 mb-6 animate-float">
+      <div className="flex flex-col items-center text-center relative z-10 pt-2">
+        <div className="w-14 h-14 md:w-16 md:h-16 bg-emerald-500 rounded-2xl flex items-center justify-center text-white shadow-xl shadow-emerald-100 mb-5 animate-float">
           <CheckCircle2 size={32} />
         </div>
         <span className="text-[10px] font-black uppercase tracking-[0.4em] text-emerald-600 mb-2">Verdict in Progress</span>
-        <h2 className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter leading-none">{winnerName}</h2>
+        <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tighter leading-none">{winnerName}</h2>
       </div>
 
       <div className="w-full h-px bg-white/60 relative z-10" />
 
       <div className="flex w-full gap-8 items-center justify-center flex-col md:flex-row relative z-10">
         {/* Timer Circle */}
-        <div className="relative w-40 h-40 md:w-48 md:h-48 flex items-center justify-center">
-          <svg className="absolute inset-0 w-full h-full -rotate-90">
-            <circle cx="96" cy="96" r="88" fill="transparent" stroke="rgba(0,0,0,0.03)" strokeWidth="12" />
+        <div className="relative w-36 h-36 md:w-48 md:h-48 flex items-center justify-center">
+          <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="44" fill="transparent" stroke="rgba(0,0,0,0.03)" strokeWidth="8" />
             <motion.circle
-              cx="96" cy="96" r="88"
+              cx="50" cy="50" r="44"
               fill="transparent"
               stroke="#4f46e5"
-              strokeWidth="12"
-              strokeDasharray="552.9"
-              animate={{ strokeDashoffset: 552.9 - (552.9 * progress) / 100 }}
+              strokeWidth="8"
+              strokeDasharray={strokeDasharray}
+              animate={{ strokeDashoffset: strokeDasharray - (strokeDasharray * progress) / 100 }}
               transition={{ duration: 1, ease: "linear" }}
               strokeLinecap="round"
             />
           </svg>
-          <div className="flex flex-col items-center">
-            <span className="text-5xl font-black text-slate-900 tracking-tighter tabular-nums">
+          <div className="flex flex-col items-center relative z-10">
+            <span className="text-4xl md:text-5xl font-black text-slate-900 tracking-tighter tabular-nums leading-none">
               {Math.floor(secondsRemaining / 60)}:{(secondsRemaining % 60).toString().padStart(2, "0")}
             </span>
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Remaining</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1.5">Remaining</span>
           </div>
         </div>
 
         {/* Real-time Results */}
         {results && (
-          <div className="flex flex-col gap-5 flex-1 w-full md:w-auto">
+          <div className="flex flex-col gap-4 flex-1 w-full md:w-auto">
              <div className="space-y-2">
                 <div className="flex justify-between items-end">
                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Buy It</span>
@@ -121,7 +122,7 @@ export default function Stopwatch({
       </div>
 
       {/* Interaction Zone */}
-      <div className="w-full relative z-10">
+      <div className="w-full relative z-10 pb-2">
         {!isAdmin ? (
           <div className="space-y-6">
              <AnimatePresence mode="wait">
@@ -141,13 +142,16 @@ export default function Stopwatch({
              
             {userVote ? (
               <div className="flex items-center justify-center gap-3 p-5 bg-indigo-50 text-indigo-600 rounded-3xl border-2 border-indigo-100 font-black text-sm tracking-widest">
-                 <CheckCircle2 size={24} />
+                 <CheckCircle2 size={24} className="animate-pulse" />
                  LOCKED: {userVote.toUpperCase()}
               </div>
             ) : !isActive ? (
-               <div className="flex flex-col items-center gap-3 p-8 bg-slate-50/50 border-2 border-dashed border-slate-200 rounded-3xl">
-                  <div className="w-10 h-10 rounded-full border-4 border-indigo-100 border-t-indigo-600 animate-spin" />
-                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mt-2">Waiting for session to start</span>
+               <div className="flex flex-col items-center gap-4 p-8 bg-slate-50/50 border-2 border-dashed border-slate-200 rounded-[2rem]">
+                  <div className="relative flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full border-4 border-indigo-100 border-t-indigo-600 animate-spin" />
+                    <div className="absolute w-6 h-6 bg-indigo-50 rounded-full" />
+                  </div>
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">Waiting for session to start</span>
                </div>
             ) : (
               <div className="flex gap-4">
@@ -156,14 +160,14 @@ export default function Stopwatch({
                   className="flex-1 flex flex-col items-center gap-3 p-6 bg-emerald-50 border-2 border-emerald-100 rounded-3xl hover:bg-emerald-500 hover:text-white transition-all group premium-shadow active:scale-95"
                 >
                   <ThumbsUp className="text-emerald-500 group-hover:text-white transition-transform group-hover:scale-110" size={28} />
-                  <span className="text-xs font-black tracking-widest">BUY IT</span>
+                  <span className="text-[10px] font-black tracking-[0.2em]">BUY IT</span>
                 </button>
                 <button
                   onClick={() => onVote?.('leave')}
                   className="flex-1 flex flex-col items-center gap-3 p-6 bg-rose-50 border-2 border-rose-100 rounded-3xl hover:bg-rose-500 hover:text-white transition-all group premium-shadow active:scale-95"
                 >
                   <ThumbsDown className="text-rose-500 group-hover:text-white transition-transform group-hover:scale-110" size={28} />
-                  <span className="text-xs font-black tracking-widest">LEAVE IT</span>
+                  <span className="text-[10px] font-black tracking-[0.2em]">LEAVE IT</span>
                 </button>
               </div>
             )}
@@ -198,4 +202,5 @@ export default function Stopwatch({
     </motion.div>
   );
 }
+
 

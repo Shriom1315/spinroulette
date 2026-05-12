@@ -1,0 +1,75 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Session Rules ---
+    match /sessions/{sessionId} {
+      
+      function isValidSession(data) {
+        return data.adminId is string && data.adminId.size() <= 128
+          && data.names is list
+          && data.pitchedMembers is list
+          && (data.currentWinner == null || data.currentWinner is string)
+          && (data.stopwatchActive is bool)
+          && (data.stopwatchEndTime is number);
+      }
+
+      allow read: if isSignedIn();
+      
+      allow create: if isSignedIn() 
+        && isValidSession(incoming())
+        && incoming().adminId == request.auth.uid;
+
+      allow update: if isSignedIn()
+        && existing().adminId == request.auth.uid
+        && isValidSession(incoming())
+        && incoming().adminId == existing().adminId; // adminId is immutable
+        
+      allow delete: if isSignedIn() && existing().adminId == request.auth.uid;
+      
+      // --- Vote Rules ---
+      match /votes/{voteId} {
+        function isValidVote(data) {
+          return data.choice in ['buy', 'leave']
+            && data.userId == request.auth.uid
+            && data.winnerName is string
+            && data.timestamp is number;
+        }
+
+        allow read: if isSignedIn();
+        
+        allow create: if isSignedIn()
+          && isValidVote(incoming())
+          && voteId == (request.auth.uid + "_" + incoming().winnerName)
+          // Cross-session validation: Must be voting for the current winner
+          && get(/databases/$(database)/documents/sessions/$(sessionId)).data.currentWinner == incoming().winnerName
+          && get(/databases/$(database)/documents/sessions/$(sessionId)).data.stopwatchActive == true;
+          
+        // Votes are locked (immutable)
+        allow update, delete: if false;
+      }
+    }
+  }
+}

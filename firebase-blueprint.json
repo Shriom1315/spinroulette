@@ -1,0 +1,40 @@
+{
+  "entities": {
+    "Session": {
+      "title": "Session",
+      "description": "Global state of the roulette session",
+      "type": "object",
+      "properties": {
+        "names": { "type": "array", "items": { "type": "string" } },
+        "pitchedMembers": { "type": "array", "items": { "type": "string" } },
+        "currentWinner": { "type": "string" },
+        "stopwatchActive": { "type": "boolean" },
+        "stopwatchEndTime": { "type": "number" },
+        "adminId": { "type": "string" }
+      },
+      "required": ["names", "pitchedMembers", "adminId"]
+    },
+    "Vote": {
+      "title": "Vote",
+      "description": "Participant response for a specific pitch",
+      "type": "object",
+      "properties": {
+        "choice": { "type": "string", "enum": ["buy", "leave"] },
+        "userId": { "type": "string" },
+        "winnerName": { "type": "string" },
+        "timestamp": { "type": "number" }
+      },
+      "required": ["choice", "userId", "winnerName", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/sessions/{sessionId}": {
+      "schema": "Session",
+      "description": "The main session document"
+    },
+    "/sessions/{sessionId}/votes/{voteId}": {
+      "schema": "Vote",
+      "description": "Individual votes for the current winner"
+    }
+  }
+}

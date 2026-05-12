@@ -1,0 +1,6 @@
+{
+  "name": "SpinRoulette",
+  "description": "A high-energy spin-the-wheel roulette with CSV upload, winner highlights, and session history.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

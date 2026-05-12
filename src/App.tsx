@@ -274,10 +274,10 @@ export default function App() {
 
         <div className="relative z-10">
           <h1 className="text-5xl font-black tracking-tighter text-slate-900 mb-4">
-            Spin Roulette <span className="text-indigo-600">Pro</span>
+            Career Glow Up Night <span className="text-indigo-600">by Team GSA</span>
           </h1>
           <p className="text-slate-500 max-w-sm mx-auto mb-12 text-lg font-medium leading-relaxed">
-            The high-fidelity selection engine for competitive pitches and decision making.
+            Vote for the best pitches and help your friends glow up in their careers!
           </p>
 
           <button
@@ -310,9 +310,9 @@ export default function App() {
           </div>
           <div className="flex flex-col">
             <span className="text-xl font-black tracking-tight text-slate-900 leading-none">
-              Roulette <span className="text-indigo-500">Pro</span>
+              Career Glow Up Night <span className="text-indigo-500">by Team GSA</span>
             </span>
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">Live Session</span>
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">Live Event</span>
           </div>
         </div>
 
@@ -347,7 +347,7 @@ export default function App() {
             </div>
             <div className="px-4 py-2 bg-indigo-600 rounded-2xl flex items-center gap-3 shadow-lg shadow-indigo-100">
               <Trophy size={14} className="text-indigo-200" />
-              <span className="text-xs font-black text-white">{session?.pitchedMembers.length || 0} Winners</span>
+              <span className="text-xs font-black text-white">{session?.pitchedMembers.length || 0} Completed Pitches</span>
             </div>
           </div>
 

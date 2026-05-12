@@ -303,16 +303,17 @@ export default function App() {
       </div>
 
       {/* Global Navigation */}
-      <nav className="h-20 bg-white/70 backdrop-blur-xl border-b border-white/50 px-6 md:px-12 flex items-center justify-between shadow-sm z-[100] sticky top-0">
-        <div className="flex items-center gap-4">
-          <div className="w-11 h-11 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-100 shrink-0 transform rotate-3">
-            <RotateCw className="w-6 h-6 text-white" />
+      <nav className="h-20 bg-white/70 backdrop-blur-xl border-b border-white/50 px-4 md:px-12 flex items-center justify-between shadow-sm z-[100] sticky top-0">
+        <div className="flex items-center gap-3 md:gap-4">
+          <div className="w-10 h-10 md:w-11 md:h-11 bg-white rounded-2xl flex items-center justify-center shadow-lg border border-slate-100 shrink-0 transform rotate-3 overflow-hidden">
+            <img src="/logo.png" alt="Logo" className="w-full h-full object-contain p-1" />
           </div>
           <div className="flex flex-col">
-            <span className="text-xl font-black tracking-tight text-slate-900 leading-none">
-              Career Glow Up Night <span className="text-indigo-500">by Team GSA</span>
+            <span className="text-lg md:text-xl font-black tracking-tight text-slate-900 leading-none">
+              <span className="hidden sm:inline">Career Glow Up Night <span className="text-indigo-500">by Team GSA</span></span>
+              <span className="sm:hidden">CGU <span className="text-indigo-500">Night</span></span>
             </span>
-            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">Live Event</span>
+            <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">Live Event</span>
           </div>
         </div>
 

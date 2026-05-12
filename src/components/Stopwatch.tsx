@@ -88,8 +88,8 @@ export default function Stopwatch({
           </div>
         </div>
 
-        {/* Real-time Results */}
-        {results && (
+        {/* Real-time Results (Admin Only) */}
+        {results && isAdmin && (
           <div className="flex flex-col gap-4 flex-1 w-full md:w-auto">
              <div className="space-y-2">
                 <div className="flex justify-between items-end">

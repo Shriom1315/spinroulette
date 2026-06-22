@@ -24,6 +24,26 @@ service cloud.firestore {
       return resource.data;
     }
 
+    // --- Admin Config Rules ---
+    // config/admin stores { adminEmail: string }
+    match /config/admin {
+      // Anyone signed in can read (needed to do the email→uid check on the client)
+      allow read: if isSignedIn();
+
+      // First-time create: allowed by any signed-in user (no doc exists yet)
+      allow create: if isSignedIn()
+        && incoming().adminEmail is string
+        && incoming().adminEmail.size() > 0
+        && incoming().adminEmail.size() <= 256;
+
+      // Update: only the current admin (email matches) can change it
+      allow update: if isSignedIn()
+        && request.auth.token.email == existing().adminEmail
+        && incoming().adminEmail is string
+        && incoming().adminEmail.size() > 0
+        && incoming().adminEmail.size() <= 256;
+    }
+
     // --- Session Rules ---
     match /sessions/{sessionId} {
       
@@ -42,10 +62,17 @@ service cloud.firestore {
         && isValidSession(incoming())
         && incoming().adminId == request.auth.uid;
 
+      // Allow update if:
+      //   a) The existing adminId matches the requester (normal case), OR
+      //   b) The requester's email matches the config/admin adminEmail (admin uid rotation)
       allow update: if isSignedIn()
-        && existing().adminId == request.auth.uid
         && isValidSession(incoming())
-        && incoming().adminId == existing().adminId; // adminId is immutable
+        && (
+          (existing().adminId == request.auth.uid && incoming().adminId == existing().adminId)
+          ||
+          (request.auth.token.email == get(/databases/$(database)/documents/config/admin).data.adminEmail
+            && incoming().adminId == request.auth.uid)
+        );
         
       allow delete: if isSignedIn() && existing().adminId == request.auth.uid;
       

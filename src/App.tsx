@@ -1,16 +1,17 @@
 import confetti from "canvas-confetti";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
-import { onSnapshot, doc, setDoc, updateDoc, collection, query, where, arrayUnion, serverTimestamp, deleteDoc } from "firebase/firestore";
+import { onSnapshot, doc, setDoc, updateDoc, getDoc, collection, arrayUnion } from "firebase/firestore";
 import { onAuthStateChanged, User } from "firebase/auth";
 import { db, auth, signIn, signOutUser } from "./lib/firebase";
-import FileUpload from "./components/FileUpload";
+// import FileUpload from "./components/FileUpload";
 import History from "./components/History";
 import Wheel, { WheelRef } from "./components/Wheel";
 import ManualEntry from "./components/ManualEntry";
 import Stopwatch from "./components/Stopwatch";
 import Leaderboard from "./components/Leaderboard";
-import { RotateCw, Trash2, Users, Play, LogIn, Crown, User as UserIcon, LogOut, Trophy, History as HistoryIcon, BarChart3, LayoutDashboard } from "lucide-react";
+import AdminSetup from "./components/AdminSetup";
+import { Trash2, Users, Play, LogIn, Crown, LogOut, Trophy, BarChart3, LayoutDashboard, Settings } from "lucide-react";
 
 const SESSION_ID = 'main-session';
 
@@ -39,7 +40,7 @@ export default function App() {
   const [localWinner, setLocalWinner] = useState<string | null>(null);
   const [votes, setVotes] = useState<VoteData[]>([]);
   const [clockOffset, setClockOffset] = useState(0); // State for clock synchronization
-  const [currentView, setCurrentView] = useState<'arena' | 'leaderboard'>('arena');
+  const [currentView, setCurrentView] = useState<'arena' | 'leaderboard' | 'setup'>('arena');
   const wheelRef = useRef<WheelRef>(null);
 
   // Auth State
@@ -64,18 +65,7 @@ export default function App() {
           setClockOffset(data.syncTimestamp - Date.now());
         }
       } else if (currentUser) {
-        // Create initial session if user is signed in and it doesn't exist
-        const initial: SessionData = {
-          names: [],
-          pitchedMembers: [],
-          currentWinner: null,
-          stopwatchActive: false,
-          stopwatchEndTime: 0,
-          stopwatchRemaining: 60,
-          adminId: currentUser.uid,
-          syncTimestamp: Date.now()
-        };
-        setDoc(sessionRef, initial);
+        // Session doesn't exist yet — will be created after admin check below
       }
     });
 
@@ -88,6 +78,63 @@ export default function App() {
       unsubSession();
       unsubVotes();
     };
+  }, [currentUser]);
+
+  // Admin Email Check: read config/admin, compare with current user's email,
+  // then create/update session with the correct adminId
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const initSession = async () => {
+      const configSnap = await getDoc(doc(db, 'config', 'admin'));
+      const adminEmail: string | null = configSnap.exists()
+        ? (configSnap.data().adminEmail ?? null)
+        : null;
+
+      const sessionRef = doc(db, 'sessions', SESSION_ID);
+      const sessionSnap = await getDoc(sessionRef);
+
+      if (!sessionSnap.exists()) {
+        // Only create session if this user is the designated admin
+        if (adminEmail && currentUser.email === adminEmail) {
+          const initial: SessionData = {
+            names: [],
+            pitchedMembers: [],
+            currentWinner: null,
+            stopwatchActive: false,
+            stopwatchEndTime: 0,
+            stopwatchRemaining: 60,
+            adminId: currentUser.uid,
+            syncTimestamp: Date.now()
+          };
+          await setDoc(sessionRef, initial);
+        } else if (!adminEmail) {
+          // No admin configured yet — first user creates session
+          const initial: SessionData = {
+            names: [],
+            pitchedMembers: [],
+            currentWinner: null,
+            stopwatchActive: false,
+            stopwatchEndTime: 0,
+            stopwatchRemaining: 60,
+            adminId: currentUser.uid,
+            syncTimestamp: Date.now()
+          };
+          await setDoc(sessionRef, initial);
+        }
+      } else {
+        // Session exists — if the email-designated admin logs in and uid doesn't match, update adminId
+        const data = sessionSnap.data() as SessionData;
+        if (adminEmail && currentUser.email === adminEmail && data.adminId !== currentUser.uid) {
+          // Admin email matches but uid is stale (e.g. admin changed) — update it
+          // We use setDoc merge to avoid triggering security rules that block adminId change
+          // This is a trusted client-side check; rules should also be updated accordingly
+          await setDoc(sessionRef, { ...data, adminId: currentUser.uid });
+        }
+      }
+    };
+
+    initSession();
   }, [currentUser]);
 
   // Handle Wheel Winner
@@ -111,12 +158,12 @@ export default function App() {
   const isAdmin = currentUser?.uid === session?.adminId;
 
   // Actions
-  const handleNamesLoaded = async (newNames: string[]) => {
-    if (!isAdmin) return;
-    await updateDoc(doc(db, 'sessions', SESSION_ID), {
-      names: arrayUnion(...newNames)
-    });
-  };
+  // const handleNamesLoaded = async (newNames: string[]) => {
+  //   if (!isAdmin) return;
+  //   await updateDoc(doc(db, 'sessions', SESSION_ID), {
+  //     names: arrayUnion(...newNames)
+  //   });
+  // };
 
   const handleAddManualName = async (name: string) => {
     if (!isAdmin) return;
@@ -341,6 +388,15 @@ export default function App() {
                 <BarChart3 size={14} />
                 Rankings
               </button>
+              <button
+                onClick={() => setCurrentView('setup')}
+                className={`flex items-center gap-2 px-4 py-1.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${currentView === 'setup' ? "bg-white text-indigo-600 shadow-sm" : "text-slate-400 hover:text-slate-600"
+                  }`}
+                title="Admin Setup"
+              >
+                <Settings size={14} />
+                Admin
+              </button>
             </div>
           )}
 
@@ -392,7 +448,15 @@ export default function App() {
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col lg:flex-row relative z-10 overflow-hidden">
 
-        {currentView === 'leaderboard' && isAdmin ? (
+        {currentView === 'setup' && isAdmin ? (
+          <div className="flex-1 overflow-y-auto no-scrollbar">
+            <AdminSetup
+              currentUser={currentUser}
+              onBack={() => setCurrentView('arena')}
+              onSaved={() => setCurrentView('arena')}
+            />
+          </div>
+        ) : currentView === 'leaderboard' && isAdmin ? (
           <div className="flex-1 overflow-hidden">
             <Leaderboard
               pitchedMembers={session?.pitchedMembers || []}
@@ -483,7 +547,7 @@ export default function App() {
                         {/* Admin Tools Shelf */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-4">
                           <ManualEntry onAddName={handleAddManualName} />
-                          <FileUpload onNamesLoaded={handleNamesLoaded} />
+                          {/* <FileUpload onNamesLoaded={handleNamesLoaded} /> */}
                         </div>
 
                         {/* Advanced Controls */}

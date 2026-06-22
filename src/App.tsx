@@ -361,7 +361,7 @@ export default function App() {
           </div>
           <div className="flex flex-col">
             <span className="text-lg md:text-xl font-black tracking-tight text-slate-900 leading-none">
-              <span className="hidden sm:inline">Career Glow Up Night <span className="text-indigo-500">by Team GSA</span></span>
+              <span className="hidden sm:inline">Music Night by Lyria <span className="text-indigo-500">by Team GSA</span></span>
               <span className="sm:hidden">CGU <span className="text-indigo-500">Night</span></span>
             </span>
             <span className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-slate-400 mt-1">Live Event</span>
